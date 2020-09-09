@@ -1,10 +1,20 @@
 <template>
   <div class="contenedor">
-    <h1>Mis Tareas</h1>
-    <nueva-tarea @on-agregar="agregarTarea" />
-    <lista-tareas @click-tarea="alternarTarea" :tareas="todasLasTareas" />
-    <lista-tareas @click-tarea="alternarTarea" :tareas="tareasSinCompletar" />
-    <lista-tareas @click-tarea="alternarTarea" :tareas="tareasCompletadas" />
+    <div v-if="error">
+      {{error}}
+    </div>
+    <div v-else>
+      <div v-if="loading">
+        Cargando tareas...
+      </div>
+      <div v-else>
+        <h1>Mis Tareas</h1>
+        <nueva-tarea @on-agregar="agregarTarea" />
+        <lista-tareas @click-tarea="alternarTarea" :tareas="todasLasTareas" />
+        <lista-tareas @click-tarea="alternarTarea" :tareas="tareasSinCompletar" />
+        <lista-tareas @click-tarea="alternarTarea" :tareas="tareasCompletadas" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -34,6 +44,12 @@ export default {
     }
   },
   computed: {
+    loading(){
+      return store.state.loading;
+    },
+    error(){
+      return store.state.error;
+    },
     todasLasTareas() {
       return store.state.tareas;
     },
@@ -47,6 +63,9 @@ export default {
         return tarea.completed;
       });
     }
+  },
+  beforeMount() {
+    store.dispatch("OBTENER_TAREAS");
   }
 };
 </script>
