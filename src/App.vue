@@ -1,19 +1,18 @@
 <template>
   <div class="contenedor">
-    <div v-if="error">
-      {{error}}
-    </div>
-    <div v-else>
-      <div v-if="loading">
-        Cargando tareas...
-      </div>
-      <div v-else>
-        <h1>Mis Tareas</h1>
-        <nueva-tarea @on-agregar="agregarTarea" />
-        <lista-tareas @click-tarea="alternarTarea" :tareas="todasLasTareas" />
-        <lista-tareas @click-tarea="alternarTarea" :tareas="tareasSinCompletar" />
-        <lista-tareas @click-tarea="alternarTarea" :tareas="tareasCompletadas" />
-      </div>
+    <!-- Componente que muestra el error si existe -->
+    <error v-if="error" :error="error" />
+
+    <!-- Componente que muestra estado de "cargando" si existe -->
+    <loading v-if="loading" />
+
+    <!-- Mostramos nuestra app solo si NO hay error y NO estamos cargando -->
+    <div v-if="!loading && !error">
+      <h1>Mis Tareas</h1>
+      <nueva-tarea @on-agregar="agregarTarea" />
+      <lista-tareas @click-tarea="alternarTarea" :tareas="todasLasTareas" title="Todas las tareas" />
+      <lista-tareas @click-tarea="alternarTarea" :tareas="tareasSinCompletar" title="Tareas sin completar" />
+      <lista-tareas @click-tarea="alternarTarea" :tareas="tareasCompletadas" title="Tareas ya completadas" />
     </div>
   </div>
 </template>
@@ -22,12 +21,16 @@
 import store from "./store"
 import NuevaTarea from "./components/NuevaTarea";
 import ListaTareas from "./components/ListaTareas";
+import Error from "./components/Error";
+import Loading from "./components/Loading";
 
 export default {
   name: "App",
   components: {
     NuevaTarea,
-    ListaTareas
+    ListaTareas,
+    Error,
+    Loading
   },
   methods: {
     agregarTarea(label) {
@@ -45,26 +48,41 @@ export default {
   },
   computed: {
     loading(){
+      /** Obtenemos el estado de loading del state */
       return store.state.loading;
     },
     error(){
+      /** Obtenemos el error (si existe) del state */
       return store.state.error;
     },
     todasLasTareas() {
+      /** Obtenemos todas las tareas del state */
       return store.state.tareas;
     },
     tareasSinCompletar() {
+      /**
+       * Generamos una propiedad nueva que tenga SOLO
+       * las tareas completadas
+       */
       return this.todasLasTareas.filter(tarea => {
         return !tarea.completed;
       });
     },
     tareasCompletadas() {
+      /**
+       * Generamos una propiedad nueva que tenga SOLO
+       * las tareas SIN completar
+       */
       return this.todasLasTareas.filter(tarea => {
         return tarea.completed;
       });
     }
   },
   beforeMount() {
+    /**
+     * Antes que monte este componente, llamamos al action
+     * para traer las tareas de la API
+     */
     store.dispatch("OBTENER_TAREAS");
   }
 };

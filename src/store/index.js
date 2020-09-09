@@ -17,14 +17,17 @@ export default new Vuex.Store({
     OBTENER_TAREAS: (context) => {
       /** Ponmos el loading en TRUE */
       context.commit("ON_LOADING", true);
+
       /** Llamamos a la api para obtener las tareas */
       Axios.get("https://run.mocky.io/v3/0c5bd316-7302-4381-8fe1-22ffdbcf62c7?mocky-delay=2000ms")
+
+      /** En caso de exito, llamamos al action para guardar */
       .then(response => {
-        /** En caso de exito, llamamos al action para guardar */
         context.dispatch("OBTENER_TAREAS_SUCCESS", response.data);
       })
+
+      /** En caso de error, mostramos el error */
       .catch(error => {
-        /** En caso de error, mostramos el error (TODO) */
         context.dispatch("OBTENER_TAREAS_ERROR", error);
       });
     },
